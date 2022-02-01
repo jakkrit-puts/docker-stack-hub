@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:5.7
+    restart: always
+    networks:
+      - web_network
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=1234
+      - MYSQL_DATABASE=wordpress_db
+      - MYSQL_USER=wordpress
+      - MYSQL_PASSWORD=wordpress
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:php7.4-fpm-alpine
+    restart: always
+    networks:
+      - web_network
+    volumes:
+      - ./wordpress:/var/www/html
+    ports:
+      - 8801:80
+    environment:
+      - WORDPRESS_DB_HOST=db:3306
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD=wordpress
+      - WORDPRESS_DB_NAME=wordpress_db
+    links:
+      - db
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin
+    restart: always
+    networks:
+      - web_network
+    environment:
+      - PMA_ARBITRARY=1
+    ports:
+      - 8802:80
+  nginx:
+    image: nginx:alpine
+    networks:
+      - web_network
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./wordpress:/var/www/html
+    ports:
+      - 8803:80
+    links:
+      - wordpress
+
+networks:
+  web_network:
+    name: wlemp
+    driver: bridge 

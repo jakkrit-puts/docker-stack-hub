@@ -1,1 +1,2 @@
-"# docker-stack-hub" 
+# Docker Stack Hub
+
